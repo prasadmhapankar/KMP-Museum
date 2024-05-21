@@ -35,6 +35,7 @@ fun ListScreen(
     val viewModel: ListViewModel = koinViewModel()
     val objects by viewModel.featureListState.collectAsState()
     val list = objects.list ?: emptyList()
+
     AnimatedContent(
         targetState = list.isNotEmpty(),
         label = "AnimatedContent"

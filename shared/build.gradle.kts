@@ -49,7 +49,9 @@ kotlin {
 
             //KMM ViewModel
             api(libs.kmm.viewmodel)
+
             api(libs.androidx.lifecycle.viewmodel)
+
         }
 
         // Required by KMM-ViewModel

@@ -7,14 +7,14 @@
 //
 import Foundation
 import SwiftUI
+import KMPObservableViewModelSwiftUI
+import KMPNativeCoroutinesAsync
 import Shared
 
-@available(iOS 16.0, *)
 struct ListView: View {
     
-    @State private var viewModel : ListViewModel? = nil
-
-    @State private var museumListState: MuseumListState?
+    @StateViewModel
+    var viewModel = SharedModuleDependencies.shared.listViewModel
     
     let columns = [
         GridItem(.adaptive(minimum: 120), alignment: .top)
@@ -22,53 +22,81 @@ struct ListView: View {
 
     var body: some View {
         ZStack {
-            if(museumListState != nil){
-                NavigationStack {
-                    ScrollView {
-                        LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
-                            if(museumListState?.list != nil){
-                                ForEach(museumListState?.list ?? [MuseumObject](), id: \.self) { item in
-                                    NavigationLink(destination: DetailView(objectId: item.objectID)) {
-                                        ObjectFrame(obj: item, onClick: {})
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-            } else {
+            
+            if let list = viewModel.featureListState.list, list.isEmpty {
                 Text("No data available")
-            }
-        }.task {
-            let viewModel = SharedModuleDependencies.shared.listViewModel
-            await withTaskCancellationHandler(
-                            operation: {
-                                self.viewModel = viewModel
-                                self.viewModel!.getMuseumData()
-                            },
-                            onCancel: {
-                                viewModel.onCleared()
-                                DispatchQueue.main.async {
-                                    self.viewModel = nil
-                                }
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
+                        ForEach(viewModel.featureListState.list ?? [MuseumObject](), id: \.self) { item in
+                            NavigationLink(destination: DetailView(objectId: item.objectID)) {
+                                ObjectFrame(obj: item, onClick: {})
                             }
-                        )
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
             
-        }
-        .task{
-            if !viewModel.featureListState.isEmpty{
+            
+            
+            //if(viewModel != nil){
                 
-            }
-            
-            if(viewModel?.featureListState != nil){
-                self.museumListState = viewModel?.featureListState.value
-            }
+//                if ((viewModel.featureListState.list?.isEmpty) == nil) {
+                    
+//                }else {
+//
+//                }
+                
+//                ScrollView {
+//                    LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
+//                        if(museumListState?.list != nil){
+//                            ForEach(museumListState?.list ?? [MuseumObject](), id: \.self) { item in
+//                                NavigationLink(destination: DetailView(objectId: item.objectID)) {
+//                                    ObjectFrame(obj: item, onClick: {})
+//                                }
+//                                .buttonStyle(PlainButtonStyle())
+//                            }
+//                        }
+//                    }
+//                    .padding(.horizontal)
+//                }
+//            } else {
+//                Text("No data available")
+//            }
         }
+//        .task {
+//            
+//            DispatchQueue.global(qos: .background).async {
+//                viewModel.getMuseumData()
+//            }
+//        
+//            
+//            isLoading = false
+//            
+//            
+//            
+//            //let viewModel = SharedModuleDependencies.shared.listViewModel
+//            await withTaskCancellationHandler(
+//                            operation: {
+//                                self.viewModel = viewModel
+//                                self.viewModel.getMuseumData()
+//                            },
+//                            onCancel: {
+//                                viewModel.onCleared()
+//                                DispatchQueue.main.async {
+//                                    self.viewModel = nil
+//                                }
+//                            }
+//                        )
+//            
+//        }
     }
+    
 
 }
+
 
 struct ObjectFrame: View {
     let obj: MuseumObject

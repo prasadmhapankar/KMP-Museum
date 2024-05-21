@@ -1,8 +1,8 @@
 package org.prasadmhapankar.kmpmuseum.presentation
 
-import com.rickclephas.kmm.viewmodel.KMMViewModel
-import com.rickclephas.kmm.viewmodel.stateIn
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
+import com.rickclephas.kmp.observableviewmodel.ViewModel
+import com.rickclephas.kmp.observableviewmodel.stateIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +14,7 @@ import org.prasadmhapankar.kmpmuseum.data.MuseumRepository
 
 class DetailViewModel(
     private val museumRepository: MuseumRepository,
-) : KMMViewModel() {
+) : ViewModel() {
 
     private val objectId = MutableStateFlow<Int?>(null)
 
