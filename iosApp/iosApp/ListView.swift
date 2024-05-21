@@ -10,11 +10,15 @@ import SwiftUI
 import KMPObservableViewModelSwiftUI
 import KMPNativeCoroutinesAsync
 import Shared
+import KMPNativeCoroutinesCombine
+
 
 struct ListView: View {
     
-    @StateViewModel
     var viewModel = SharedModuleDependencies.shared.listViewModel
+        
+    @State private var isLoading: Bool = true
+    @State private var list: [MuseumObject] = []
     
     let columns = [
         GridItem(.adaptive(minimum: 120), alignment: .top)
@@ -22,81 +26,56 @@ struct ListView: View {
 
     var body: some View {
         ZStack {
-            
-            if let list = viewModel.featureListState.list, list.isEmpty {
-                Text("No data available")
+            if isLoading {
+                ProgressView("Loading...")
             } else {
-                ScrollView {
-                    LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
-                        ForEach(viewModel.featureListState.list ?? [MuseumObject](), id: \.self) { item in
-                            NavigationLink(destination: DetailView(objectId: item.objectID)) {
-                                ObjectFrame(obj: item, onClick: {})
+                
+                NavigationStack {
+                    ScrollView {
+                        LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
+                            ForEach(list, id: \.self) { item in
+                                NavigationLink(destination: DetailView(objectId: item.objectID)) {
+                                    ObjectFrame(obj: item, onClick: {})
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
-                            .buttonStyle(PlainButtonStyle())
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 }
+                .navigationTitle("iOS")
             }
-            
-            
-            
-            //if(viewModel != nil){
-                
-//                if ((viewModel.featureListState.list?.isEmpty) == nil) {
-                    
-//                }else {
-//
-//                }
-                
-//                ScrollView {
-//                    LazyVGrid(columns: columns, alignment: .leading, spacing: 20) {
-//                        if(museumListState?.list != nil){
-//                            ForEach(museumListState?.list ?? [MuseumObject](), id: \.self) { item in
-//                                NavigationLink(destination: DetailView(objectId: item.objectID)) {
-//                                    ObjectFrame(obj: item, onClick: {})
-//                                }
-//                                .buttonStyle(PlainButtonStyle())
-//                            }
-//                        }
-//                    }
-//                    .padding(.horizontal)
-//                }
-//            } else {
-//                Text("No data available")
-//            }
         }
-//        .task {
-//            
-//            DispatchQueue.global(qos: .background).async {
-//                viewModel.getMuseumData()
-//            }
-//        
-//            
-//            isLoading = false
-//            
-//            
-//            
-//            //let viewModel = SharedModuleDependencies.shared.listViewModel
-//            await withTaskCancellationHandler(
-//                            operation: {
-//                                self.viewModel = viewModel
-//                                self.viewModel.getMuseumData()
-//                            },
-//                            onCancel: {
-//                                viewModel.onCleared()
-//                                DispatchQueue.main.async {
-//                                    self.viewModel = nil
-//                                }
-//                            }
-//                        )
-//            
-//        }
+        .task {
+            for await state in viewModel.featureListState {
+                isLoading = false
+                list = state.list ?? []
+            }
+        }
     }
-    
-
 }
 
+//extension List {
+//    @MainActor
+//    class VewModel: ObservableObject {
+//        @Published  var list = [MuseumObject]()
+//        
+//        func startObserving() {
+//            Task {
+//                list = SharedModuleDependencies.shared.listViewModel.featureListState ?? []
+//            }
+//        }
+//        
+//    }
+//}
+//
+//func startObserving() {
+//    Task {
+//        for await phrase in SharedModuleDependencies.shared.museumRepository.getData() {
+//           // self.greetings.append(phrase)
+//        }
+//    }
+//}
 
 struct ObjectFrame: View {
     let obj: MuseumObject

@@ -1,19 +1,21 @@
 package org.prasadmhapankar.kmpmuseum.presentation
 
-import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
-import com.rickclephas.kmp.observableviewmodel.ViewModel
-import com.rickclephas.kmp.observableviewmodel.launch
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.prasadmhapankar.kmpmuseum.data.MuseumRepository
 
 class ListViewModel(private val museumRepository: MuseumRepository) : ViewModel() {
 
-    private val _state = kotlinx.coroutines.flow.MutableStateFlow(MuseumListState())
-    @NativeCoroutinesState
+    private val _state = MutableStateFlow(MuseumListState())
     val featureListState = _state.asStateFlow()
+
 
     /*@NativeCoroutinesState
     val featureListState: StateFlow<List<MuseumObject>> =
@@ -26,12 +28,13 @@ class ListViewModel(private val museumRepository: MuseumRepository) : ViewModel(
 
     private fun getMuseumData() {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = museumRepository.getData()
-            println("Museum Api response - $response")
-            _state.update {
-                it.copy(list = response)
+            museumRepository.getData().collectLatest { response ->
+                println("Museum Api response - $response")
+                _state.update {
+                    it.copy(list = response)
+                }
+                museumRepository.saveObjects(response)
             }
-            museumRepository.saveObjects(response)
         }
     }
 

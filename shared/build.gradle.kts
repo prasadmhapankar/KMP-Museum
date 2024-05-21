@@ -1,3 +1,7 @@
+import co.touchlab.skie.configuration.EnumInterop
+import co.touchlab.skie.configuration.FlowInterop
+import co.touchlab.skie.configuration.SealedInterop
+import co.touchlab.skie.configuration.SuspendInterop
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -5,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kmpNativeCoroutines)
+    alias(libs.plugins.skie)
 }
 
 kotlin {
@@ -72,5 +77,17 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+}
+
+skie {
+    features {
+        group {
+            FlowInterop.Enabled(true)
+            coroutinesInterop.set(true)
+            SuspendInterop.Enabled(true)
+            EnumInterop.Enabled(true)
+            SealedInterop.Enabled(true)
+        }
     }
 }

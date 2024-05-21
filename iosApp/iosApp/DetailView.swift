@@ -21,8 +21,11 @@ struct DetailView: View {
                 ObjectDetails(obj: obj as! MuseumObject)
                 }
         }
+        .task {
+            
+        }
         .onAppear {
-                viewModel?.setId(objectId: objectId)
+            viewModel?.setId(objectId: objectId)
         }
     }
 }
